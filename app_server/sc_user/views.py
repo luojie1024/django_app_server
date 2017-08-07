@@ -108,7 +108,8 @@ def register(request):
 @csrf_exempt
 def register_is_exist(request):
     if request.method == 'POST':
-        uphone = request.POST.get('uphone')
+        data = JSONParser().parse(request)
+        uphone = data['uphone']
         count = UserInfo.objects.filter(uphone=uphone).count()
         if count == 0:
             return JsonResponse({'success': False})
