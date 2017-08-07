@@ -1,0 +1,14 @@
+{% extends "admin/base.html" %}
+
+{% block title %}
+    智慧社区后台管理系统
+{% endblock %}
+
+
+
+{% block branding %}
+<h1 id="site-name"><a href="{% url 'admin:index' %}">环泰智慧社区后台管理系统</a></h1>
+<!--<h1 id="site-name"><a href="{% url 'admin:index' %}">{{ site_header|default:_('Django administration') }}</a></h1>-->
+{% endblock %}
+
+{% block nav-global %}{% endblock %}

@@ -1,18 +1,15 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.shortcuts import render
 from django.http import HttpResponse
 from hashlib import sha1
 from django.http import JsonResponse
 from rest_framework.response import Response
 from .models import UserInfo
-from rest_framework import permissions
 
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.renderers import JSONRenderer
 from rest_framework.parsers import JSONParser
-from rest_framework.decorators import api_view, permission_classes
 from serializers import UserSerializer
 
 
@@ -96,7 +93,7 @@ def snippet_list(request):
 
 # 注册处理
 @csrf_exempt
-def register_handle(request):
+def register(request):
     if request.method == 'POST':
         data = JSONParser().parse(request)
         serializer = UserSerializer(data=data)
@@ -119,11 +116,21 @@ def register_is_exist(request):
             return JsonResponse({'success': True})
 
 
-# 登录界面
+# 登录
+@csrf_exempt
 def login(request):
-    uname = request.COOKIES.get('uname', '')
-    context = {'title': '用户登录', 'error_name': 0, 'error_pwd': 0, 'uname': uname}
-    return render(request, 'df_user/login.html', context)
+    if request.method == 'POST':
+        data = JSONParser().parse(request)
+        uphone=data['uphone']
+        upwd = data['upwd']
+        users = UserInfo.objects.filter(uphone=uphone)
+        if len(users) == 1:
+          if upwd == users[0].upwd:
+              return JsonResponse({'success': True})
+          else:
+              return JsonResponse({'success': False})
+        else:
+            return JsonResponse({'success': False})
 
 # 登录处理
 # def login_handle(request):
