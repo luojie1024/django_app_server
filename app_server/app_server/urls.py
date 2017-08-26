@@ -24,5 +24,6 @@ router.register(r'users', api.UserViewSet)
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^user/', include('sc_user.urls')),
+    url(r'^gateway/', include('sc_gateway.urls')),
     url(r'^', include(router.urls)),
 ]

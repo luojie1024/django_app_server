@@ -2,9 +2,7 @@
 from __future__ import unicode_literals
 
 from django.http import HttpResponse
-from hashlib import sha1
 from django.http import JsonResponse
-from rest_framework.response import Response
 from .models import UserInfo
 
 from django.views.decorators.csrf import csrf_exempt
