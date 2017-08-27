@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Django settings for app_server project.
 
@@ -51,6 +52,8 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'app_server.urls'
+#启用put delete必需配置
+APPEND_SLASH=False
 
 TEMPLATES = [
     {
