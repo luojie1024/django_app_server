@@ -26,5 +26,5 @@ urlpatterns = [
     url(r'^user/', include('sc_user.urls')),
     url(r'^gateway/', include('sc_gateway.urls')),
     url(r'^', include(router.urls)),
-    # url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+    url(r'^device/', include('sc_device.urls')),
 ]
