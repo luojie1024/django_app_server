@@ -148,6 +148,11 @@ def login_handle(request,pk):
     # 修改指定用户的信息（忘记密码）
     elif request.method == 'PUT':
         data = JSONParser().parse(request)
+        try:
+            user = UserInfo.objects.get(pk=pk)
+        except user.DoesNotExist:
+            return HttpResponse(status=404)
+
         serializer = UserSerializer(user, data=data)
         if serializer.is_valid():
             serializer.save()
@@ -166,7 +171,7 @@ def login(request):
         users = UserInfo.objects.all()
         serializer = UserSerializer(users, many=True)
         return JSONResponse(serializer.data)
-    #添加网关
+    #注册
     elif request.method == 'POST':
         data = JSONParser().parse(request)
         serializer = UserSerializer(data=data)
@@ -175,8 +180,29 @@ def login(request):
             return JsonResponse(serializer.data,status=201)
         else:
             return JsonResponse(serializer.data,status=400)
-
-
+    elif request.method == 'PUT':
+        data = JSONParser().parse(request)
+        uphone = data['uphone']
+        upwd = data['upwd']
+        #查询对应手机号的用户
+        users=UserInfo.objects.filter(uphone=uphone)
+        #判断用户是否存在
+        if len(users)<1:
+            return HttpResponse(status=404)
+        #获得用户的PK
+        pk=users[0].id
+        try:
+            user = UserInfo.objects.get(pk=pk)
+        except user.DoesNotExist:
+            return HttpResponse(status=404)
+        #修改密码
+        user.upwd=upwd
+        #序列化
+        serializer = UserSerializer(user, data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data, status=201)
+        return JsonResponse(serializer.errors, status=400)
 
 # 登录处理
 # def login_handle(request):
