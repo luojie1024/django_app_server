@@ -16,7 +16,6 @@ class JSONResponse(HttpResponse):
     """
     An HttpResponse that renders it's content into JSON.
     """
-
     def __init__(self, data, **kwargs):
         content = JSONRenderer().render(data)
         kwargs['content_type'] = 'application/json'
@@ -101,6 +100,22 @@ def register(request):
         else:
             return JsonResponse({'success': False})
 
+# 登录
+@csrf_exempt
+def login_old(request):
+    if request.method == 'POST':
+        data = JSONParser().parse(request)
+        uphone=data['uphone']
+        upwd = data['upwd']
+        users = UserInfo.objects.filter(uphone=uphone)
+        if len(users) == 1:
+          if upwd == users[0].upwd:
+              return JsonResponse({'success': True})
+          else:
+              return JsonResponse({'success': False})
+        else:
+            return JsonResponse({'success': False})
+
 
 # 判断用户是否已经存在
 @csrf_exempt
@@ -114,22 +129,54 @@ def register_is_exist(request):
         else:
             return JsonResponse({'success': True})
 
+# 登录
+@csrf_exempt
+def login_handle(request,pk):
+    try:
+        user = UserInfo.objects.get(pk=pk)
+    except user.DoesNotExist:
+        return HttpResponse(status=404)
+    #
+    if request.method == 'POST':
+        serializer = UserSerializer(user)
+        return JSONResponse(serializer.data)
+
+    # 获得指定用户的信息
+    elif request.method == 'GET':
+        serializer = UserSerializer(user)
+        return JSONResponse(serializer.data)
+    # 修改指定用户的信息（忘记密码）
+    elif request.method == 'PUT':
+        data = JSONParser().parse(request)
+        serializer = UserSerializer(user, data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data, status=201)
+        return JsonResponse(serializer.errors, status=400)
+    # 删除指定用户信息
+    elif request.method == 'DELETE':
+        user.delete()
+        return HttpResponse(status=204)
+
 
 # 登录
 @csrf_exempt
 def login(request):
-    if request.method == 'POST':
+    if request.method == 'GET':
+        users = UserInfo.objects.all()
+        serializer = UserSerializer(users, many=True)
+        return JSONResponse(serializer.data)
+    #添加网关
+    elif request.method == 'POST':
         data = JSONParser().parse(request)
-        uphone=data['uphone']
-        upwd = data['upwd']
-        users = UserInfo.objects.filter(uphone=uphone)
-        if len(users) == 1:
-          if upwd == users[0].upwd:
-              return JsonResponse({'success': True})
-          else:
-              return JsonResponse({'success': False})
+        serializer = UserSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data,status=201)
         else:
-            return JsonResponse({'success': False})
+            return JsonResponse(serializer.data,status=400)
+
+
 
 # 登录处理
 # def login_handle(request):
