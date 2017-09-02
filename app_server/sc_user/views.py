@@ -16,6 +16,7 @@ class JSONResponse(HttpResponse):
     """
     An HttpResponse that renders it's content into JSON.
     """
+
     def __init__(self, data, **kwargs):
         content = JSONRenderer().render(data)
         kwargs['content_type'] = 'application/json'
@@ -100,21 +101,19 @@ def register(request):
         else:
             return JsonResponse({'success': False})
 
+
 # 登录
 @csrf_exempt
-def login_old(request):
-    if request.method == 'POST':
-        data = JSONParser().parse(request)
-        uphone=data['uphone']
-        upwd = data['upwd']
-        users = UserInfo.objects.filter(uphone=uphone)
-        if len(users) == 1:
-          if upwd == users[0].upwd:
-              return JsonResponse({'success': True})
-          else:
-              return JsonResponse({'success': False})
-        else:
-            return JsonResponse({'success': False})
+def login_old(request,pk):
+    if request.method == 'GET':
+        users = UserInfo.objects.filter(uphone=pk)
+        pk = users[0].id
+        try:
+            user = UserInfo.objects.get(pk=pk)
+        except user.DoesNotExist:
+            return HttpResponse(status=404)
+        serializer = UserSerializer(user)
+        return JsonResponse(serializer.data, status=200)
 
 
 # 判断用户是否已经存在
@@ -129,9 +128,10 @@ def register_is_exist(request):
         else:
             return JsonResponse({'success': True})
 
+
 # 登录
 @csrf_exempt
-def login_handle(request,pk):
+def login_handle(request, pk):
     try:
         user = UserInfo.objects.get(pk=pk)
     except user.DoesNotExist:
@@ -171,33 +171,33 @@ def login(request):
         users = UserInfo.objects.all()
         serializer = UserSerializer(users, many=True)
         return JSONResponse(serializer.data)
-    #注册
+    # 注册
     elif request.method == 'POST':
         data = JSONParser().parse(request)
         serializer = UserSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
-            return JsonResponse(serializer.data,status=201)
+            return JsonResponse(serializer.data, status=201)
         else:
-            return JsonResponse(serializer.data,status=400)
+            return JsonResponse(serializer.data, status=400)
     elif request.method == 'PUT':
         data = JSONParser().parse(request)
         uphone = data['uphone']
         upwd = data['upwd']
-        #查询对应手机号的用户
-        users=UserInfo.objects.filter(uphone=uphone)
-        #判断用户是否存在
-        if len(users)<1:
+        # 查询对应手机号的用户
+        users = UserInfo.objects.filter(uphone=uphone)
+        # 判断用户是否存在
+        if len(users) < 1:
             return HttpResponse(status=404)
-        #获得用户的PK
-        pk=users[0].id
+        # 获得用户的PK
+        pk = users[0].id
         try:
             user = UserInfo.objects.get(pk=pk)
         except user.DoesNotExist:
             return HttpResponse(status=404)
-        #修改密码
-        user.upwd=upwd
-        #序列化
+        # 修改密码
+        user.upwd = upwd
+        # 序列化
         serializer = UserSerializer(user, data=data)
         if serializer.is_valid():
             serializer.save()
