@@ -21,13 +21,14 @@ class JSONResponse(HttpResponse):
         super(JSONResponse, self).__init__(content, **kwargs)
 
 
+
 # 网关列表
 @csrf_exempt
-def gateway_list(request):
+def gateway(request):
     #获取网关列表
     if request.method == 'GET':
-        snippets = GatewayInfo.objects.all()
-        serializer = GatewaySerializer(snippets, many=True)
+        gateway = GatewayInfo.objects.all()
+        serializer = GatewaySerializer(gateway, many=True)
         return JSONResponse(serializer.data)
     #添加网关
     elif request.method == 'POST':
@@ -38,6 +39,20 @@ def gateway_list(request):
             return JsonResponse(serializer.data,status=201)
         else:
             return JsonResponse(serializer.data,status=400)
+
+# 指定用户的网关列表
+@csrf_exempt
+def gateway_list(request,pk):
+    try:
+        gateways = GatewayInfo.objects.filter(guser=pk)
+    except gateways.DoesNotExist:
+        return HttpResponse(status=404)
+    #获得指定网关的信息
+    if request.method == 'GET':
+        serializer = GatewaySerializer(gateways,many=True)
+        if len(gateways)<1:
+            return HttpResponse(status=404)
+        return JSONResponse(serializer.data,status=200)
 
 # 网关列表
 @csrf_exempt
